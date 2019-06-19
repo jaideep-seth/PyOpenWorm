@@ -19,6 +19,10 @@ from .csv_ds import CSVDataTranslator, CSVDataSource
 from .common_data import TRANS_NS
 from .data_with_evidence_ds import DataWithEvidenceDataSource
 
+import logging
+
+L = logging.getLogger(__name__)
+
 
 class ConnectomeCSVDataSource(CSVDataSource):
     '''
@@ -211,7 +215,6 @@ class NeuronConnectomeSynapseClassTranslator(CSVDataTranslator):
             for row in reader:
                 pre, post, typ, number, nt = row
                 with data_source.data_context.stored(Connection, Neuron) as srcctx:
-                    print("CCC", list(srcctx.Connection.query().load()))
                     conn = srcctx.Connection.query(pre_cell=srcctx.Neuron(pre),
                                                    post_cell=srcctx.Neuron(post),
                                                    number=int(number),
@@ -230,8 +233,10 @@ class NeuronConnectomeSynapseClassTranslator(CSVDataTranslator):
                             docctx_anynum(Connection)(ident=c.identifier).synclass(nt)
                             hit = True
                         if not hit:
-                            print("Didn't find any connections matching: {}".format(conn))
-
+                            L.warn("Didn't find any connections matching: {}".format(conn))
+                        else:
+                            break
+        print('result', res)
         return res
 
 
